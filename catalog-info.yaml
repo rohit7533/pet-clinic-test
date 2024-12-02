@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1beta1
+kind: Component
+metadata:
+  name:  "pet-clinic-test"
+  description: Springboot app
+  annotations:
+    backstage.io/managed-by-location: url:https://github.com/rohit7533/pet-clinic-test
+    backstage.io/managed-by-origin-location: url:https://github.com/rohit7533/pet-clinic-test
+    tekton.dev/pipelines: default/springboot-pipeline # Namespace/PipelineName
+    backstage.io/kubernetes-id: "pet-clinic-test"
+    backstage.io/kubernetes-cluster: 'docker-desktop'
+    backstage.io/kubernetes-namespace: 'default'
+    tektonci/enabled: 'true'
+    tektonci/namespace: 'deafult'
+spec:
+  type: service
+  owner: "rohit7533"
+  lifecycle: production

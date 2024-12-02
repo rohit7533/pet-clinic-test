@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: springboot-pipeline-run
+  labels:
+    tekton.dev/pipelines: default/springboot-pipeline
+spec:
+  pipelineRef:
+    name: springboot-pipeline
+  serviceAccountName: tekton-sa
+  params:
+    - name: repo_url
+      value: "https://github.com/rohit7533/pet-clinic-test.git"
+    - name: image
+      value: "idpdeveacr.azurecr.io/pet-clinic-test:latest"
+    - name: deployment_manifest
+      value: "/workspace/source/k8s/springboot-deploy.yaml"
+    # - name: helm_chart
+    #   value: "charts/springboot"
+    - name: namespace
+      value: "default"
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 1Gi

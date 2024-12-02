@@ -1,0 +1,105 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: git-clone
+  namespace: default
+  labels:
+    tekton.dev/pipelines: default/springboot-pipeline
+spec:
+  steps:
+    - name: clone-repo
+      image: alpine/git
+      script: |
+        #!/bin/sh
+        git clone $(params.repo_url) /workspace/source
+  params:
+    - name: repo_url
+      type: string
+  workspaces:
+    - name: source
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-app
+  namespace: default
+spec:
+  steps:
+    - name: build
+      image: maven:3.8.5-openjdk-17
+      workingDir: /workspace/source
+      script: |
+        #!/bin/sh
+        mvn clean package
+  workspaces:
+    - name: source
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: docker-build-and-push
+  namespace: default
+  labels:
+    tekton.dev/pipelines: default/springboot-pipeline
+spec:
+  steps:
+    - name: buildah-build
+      image: quay.io/buildah/stable:latest
+      script: |
+        #!/bin/sh
+        ls /workspace/source -latr
+        echo "checking for registry-auth..."
+        
+        cp /workspace/source/registry-auth/.dockerconfigjson /tmp/auth.json
+        ls /tmp/ -latr
+        buildah bud --file /workspace/source/dockerfile -t $(params.image) 
+        buildah push --authfile /tmp/auth.json $(params.image)
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: registry-auth-volume
+          mountPath: /workspace/source/registry-auth
+  params:
+    - name: image
+      type: string
+  workspaces:
+    - name: source
+  volumes:
+    - name: registry-auth-volume
+      secret:
+        secretName: registry-auth
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: deploy-to-aks
+  namespace: default
+  labels:
+    tekton.dev/pipelines: default/springboot-pipeline
+spec:
+  steps:
+    - name: kubectl-apply
+      image: bitnami/kubectl:latest
+      script: |
+        #!/bin/sh
+        kubectl apply -f $(params.deployment_manifest)
+    # - name: helm-upgrade
+    #   image: alpine/helm:3.10.0
+    #   script: |
+    #     #!/bin/sh
+    #     helm upgrade --install springboot-app $(params.helm_chart) \
+    #       --namespace $(params.namespace) --set image.repository=$(params.image)
+  params:
+    - name: deployment_manifest
+      type: string
+    # - name: helm_chart
+    #   type: string
+    # - name: namespace
+    #   type: string
+    # - name: image
+    #   type: string
+  workspaces:
+    - name: source
