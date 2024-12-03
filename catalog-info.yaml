@@ -9,7 +9,7 @@ metadata:
     #tekton.dev/pipelines: default/springboot-pipeline # Namespace/PipelineName
     'backstage.io/kubernetes-id': 'pet-clinic-test'
     'backstage.io/tekton-pipeline': 'pet-clinic-test-pipeline'
-    'backstage.io/tekton-pipelinerun': 'pet-clinic-test-pipelinerun'
+    'backstage.io/tekton-pipelinerun': 'pet-clinic-test-pipeline-run'
     #backstage.io/kubernetes-cluster: 'docker-desktop'
     #backstage.io/kubernetes-namespace: 'default'
     'tektonci/enabled': 'true'
