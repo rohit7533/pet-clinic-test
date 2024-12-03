@@ -12,7 +12,7 @@ metadata:
     'backstage.io/tekton-pipelinerun': 'pet-clinic-test-pipelinerun'
     #backstage.io/kubernetes-cluster: 'docker-desktop'
     #backstage.io/kubernetes-namespace: 'default'
-    #tektonci/enabled: 'true'
+    'tektonci/enabled': 'true'
     #tektonci/namespace: 'deafult'
 spec:
   type: service
